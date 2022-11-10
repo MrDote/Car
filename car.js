@@ -9,7 +9,7 @@ const Car = function(x, y, width, height) {
     this.maxSpeed = 5;
     this.friction = 0.05;
     this.angle = 0;
-    this
+    this.damaged = false;
 
     this.sensor = new Sensor(this);
     this.controls = new Controls();
@@ -18,6 +18,7 @@ const Car = function(x, y, width, height) {
     this.update = function(roadBorders) {
         this.move();
         this.polygon = this.createPolygon();
+        this.damaged = this.isDamaged(roadBorders);
         this.sensor.update(roadBorders);
     }
 
@@ -65,20 +66,6 @@ const Car = function(x, y, width, height) {
         this.y -= Math.cos(this.angle) * this.speed;
     }
 
-    this.draw = function(ctx) {
-        ctx.beginPath();
-        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
-        for (let i = 1; i < this.polygon.length; i++) {
-            ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
-        }
-        ctx.fill();
-        
-
-        this.sensor.draw(ctx);
-        // console.log(this.sensor.rays[0][0].y == this.y);
-    }
-
-
     this.createPolygon = function() {
         const points = [];
         const rad = Math.hypot(this.width, this.height)/2;
@@ -100,6 +87,30 @@ const Car = function(x, y, width, height) {
             y: this.y - rad * Math.cos(Math.PI + this.angle + alpha)
         });
         return points;
+    }
+
+    this.isDamaged = function(roadBorders) {
+        for (let i = 0; i < roadBorders.length; i++) {
+            if (polyIntersect(roadBorders[i], this.polygon)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    this.draw = function(ctx) {
+        if (this.damaged) ctx.fillStyle = 'red';
+        // console.log(this.damaged)
+        ctx.beginPath();
+        ctx.moveTo(this.polygon[0].x, this.polygon[0].y);
+        for (let i = 1; i < this.polygon.length; i++) {
+            ctx.lineTo(this.polygon[i].x, this.polygon[i].y);
+        }
+        ctx.fill();
+        
+
+        this.sensor.draw(ctx);
+        // console.log(this.sensor.rays[0][0].y == this.y);
     }
 
 }

@@ -8,7 +8,7 @@ const Road = function(x, width, laneCount = 3) {
     this.left = x - width/2;
     this.right = x + width/2;
 
-    const inf = 10000;
+    const inf = 100000;
     this.top = -inf;
     this.bot = inf;
 
@@ -29,7 +29,7 @@ const Road = function(x, width, laneCount = 3) {
 
     this.draw = (ctx) => {
         ctx.lineWidth = this.lineWidth;
-        ctx.strokeStyle = 'white'
+        ctx.strokeStyle = 'white';
 
         for (let i = 1; i <= this.laneCount-1; i++) {
             const x = lerp(

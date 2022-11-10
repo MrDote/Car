@@ -1,12 +1,11 @@
 const Sensor = function(car) {
     this.car = car;
-    this.rayCount = 1;
+    this.rayCount = 10;
     this.rayLength = 150;
     this.raySpread = Math.PI/2;
 
     this.rays = [];
     this.readings = [];
-
 }
 
 Sensor.prototype.update = function(roadBorders) {
