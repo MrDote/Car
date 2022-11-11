@@ -8,17 +8,18 @@ const Sensor = function(car) {
     this.readings = [];
 }
 
-Sensor.prototype.update = function(roadBorders) {
+Sensor.prototype.update = function(roadBorders, dummies) {
     this.castRays();
     this.readings = [];
     for (let i = 0; i < this.rayCount; i++) {
         this.readings.push(
-            this.getRead(this.rays[i], roadBorders)
+            this.getRead(this.rays[i], roadBorders, dummies)
         );
     }
 }
 
-Sensor.prototype.getRead = function(ray, roadBorders) {
+Sensor.prototype.getRead = function(ray, roadBorders, dummies) {
+
     let touches = [];
 
     for (let i = 0; i < roadBorders.length; i++) {
@@ -33,10 +34,32 @@ Sensor.prototype.getRead = function(ray, roadBorders) {
             touches.push(touch);
         }
     }
+    
+    for (let i = 0; i < dummies.length; i++) {
+        const poly = dummies[i].polygon;
+
+        for (let j = 0; j < poly.length; j++) {
+
+            const touch = getIntersection(
+                ray[0],
+                ray[1],
+                poly[j],
+                poly[(j+1)%poly.length]
+                
+            );
+
+        
+
+            if (touch) {
+                touches.push(touch);
+            }
+        }
+    }
 
     if (touches.length == 0) {
         return null;
     }
+
     else {
         const offsets = touches.map(e => e.offset);
         const minOffset = Math.min(...offsets);
@@ -45,18 +68,24 @@ Sensor.prototype.getRead = function(ray, roadBorders) {
 }
 
 Sensor.prototype.castRays = function() {
+
     this.rays=[];
+
     for (let i = 0; i < this.rayCount; i++) {
+
         const rayAngle = lerp(
             this.raySpread/2,
             -this.raySpread/2,
             this.rayCount == 1 ? 0.5 : i/(this.rayCount - 1)
         ) + this.car.angle;
+
         const start = {x:this.car.x, y:this.car.y};
+
         const end = {
             x: this.car.x - this.rayLength * Math.sin(rayAngle),
             y: this.car.y - this.rayLength * Math.cos(rayAngle)
         }
+
         this.rays.push([start, end]);
     }
 }
@@ -84,7 +113,7 @@ Sensor.prototype.draw = function(ctx) {
         
         ctx.beginPath();
         ctx.lineWidth = 2;
-        ctx.strokeStyle = 'black';
+        ctx.strokeStyle = 'red';
         ctx.moveTo(
             this.rays[i][1].x,
             this.rays[i][1].y
